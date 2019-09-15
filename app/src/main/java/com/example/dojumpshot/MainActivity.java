@@ -320,8 +320,6 @@ public class MainActivity extends AppCompatActivity {
                                 // Auto focus should be continuous for camera preview.
                                 mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE,
                                         CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-                                // Flash is automatically enabled when necessary.
-                                setAutoFlash(mPreviewRequestBuilder);
 
                                 // Finally, we start displaying the camera preview.
                                 mPreviewRequest = mPreviewRequestBuilder.build();
@@ -435,7 +433,6 @@ public class MainActivity extends AppCompatActivity {
             // Use the same AE and AF modes as the preview.
             captureBuilder.set(CaptureRequest.CONTROL_AF_MODE,
                     CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-            setAutoFlash(captureBuilder);
 
             // Orientation
             int rotation = getWindowManager().getDefaultDisplay().getRotation();
@@ -485,7 +482,6 @@ public class MainActivity extends AppCompatActivity {
             // Reset the auto-focus trigger
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
                     CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
-            setAutoFlash(mPreviewRequestBuilder);
             mCaptureSession.capture(mPreviewRequestBuilder.build(), mCaptureCallback,
                     mBackgroundHandler);
             // After this, the camera will go back to the normal state of preview.
@@ -494,13 +490,6 @@ public class MainActivity extends AppCompatActivity {
                     mBackgroundHandler);
         } catch (CameraAccessException e) {
             e.printStackTrace();
-        }
-    }
-
-    private void setAutoFlash(CaptureRequest.Builder requestBuilder) {
-        if (mFlashSupported) {
-            requestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
-                    CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
         }
     }
 
@@ -954,6 +943,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private FloatingActionButton fabPicture;
+    private FloatingActionButton fabTorch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -962,6 +952,8 @@ public class MainActivity extends AppCompatActivity {
 
         mTextureView = (AutoFitTextureView) findViewById(R.id.textureView);
         fabPicture=(FloatingActionButton)findViewById(R.id.fabPicture);
+        fabTorch=(FloatingActionButton)findViewById(R.id.fabTorch);
+
         fabPicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -983,8 +975,27 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        fabTorch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fabTorch.setImageResource(isTorchOn?R.drawable.ic_launcher_foreground:R.drawable.ic_launcher_background);
+                switchFlash();
+            }
+        });
+
         mFile = new File(this.getExternalFilesDir(null), "pic.jpg");
+    }
 
+    private boolean isTorchOn=false;
 
+    public void switchFlash() {
+        isTorchOn=!isTorchOn;
+        mPreviewRequestBuilder.set(CaptureRequest.FLASH_MODE,isTorchOn?CaptureRequest.FLASH_MODE_TORCH:CaptureRequest.FLASH_MODE_OFF);
+        try{
+            mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), null, null);
+        }catch (CameraAccessException e)
+        {
+            e.printStackTrace();
+        }
     }
 }
