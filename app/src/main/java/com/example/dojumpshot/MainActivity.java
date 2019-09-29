@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.ImageFormat;
@@ -25,8 +26,11 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
+import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
@@ -39,21 +43,26 @@ import android.util.SparseIntArray;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static int RESULT_LOAD_IMAGE = 1;
     @Override
     public void onResume() {
         super.onResume();
@@ -351,7 +360,7 @@ public class MainActivity extends AppCompatActivity {
      * @param viewHeight The height of `mTextureView`
      */
     private void configureTransform(int viewWidth, int viewHeight) {
-        if (null == mTextureView || null == mPreviewSize || null == this) {
+        if (null == mTextureView || null == mPreviewSize) {
             return;
         }
         int rotation = getWindowManager().getDefaultDisplay().getRotation();
@@ -422,7 +431,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private void captureStillPicture() {
         try {
-            if (null == this || null == mCameraDevice) {
+            if (null == mCameraDevice) {
                 return;
             }
             // This is the CaptureRequest.Builder that we use to take a picture.
@@ -496,7 +505,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Saves a JPEG {@link Image} into the specified {@link File}.
      */
-    private static class ImageSaver implements Runnable {
+    private class ImageSaver implements Runnable {
 
         /**
          * The JPEG image
@@ -525,6 +534,9 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             } finally {
                 mImage.close();
+                Intent intent=new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                intent.setData(Uri.fromFile(mFile));
+                sendBroadcast(intent);
                 if (null != output) {
                     try {
                         output.close();
@@ -695,12 +707,12 @@ public class MainActivity extends AppCompatActivity {
     private String mCameraId;
 
     /**
-     * An {@link AutoFitTextureView} for camera preview.
+     * for camera preview.
      */
     private AutoFitTextureView mTextureView;
 
     /**
-     * A {@link CameraCaptureSession } for camera preview.
+     * for camera preview.
      */
     private CameraCaptureSession mCaptureSession;
 
@@ -710,7 +722,7 @@ public class MainActivity extends AppCompatActivity {
     private CameraDevice mCameraDevice;
 
     /**
-     * The {@link android.util.Size} of camera preview.
+     *  of camera preview.
      */
     private Size mPreviewSize;
 
@@ -763,6 +775,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private File mFile;
 
+    private File mPath;
     /**
      * This a callback object for the {@link ImageReader}. "onImageAvailable" will be called when a
      * still image is ready to be saved.
@@ -950,6 +963,20 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Move to Gallery when click camera_gallery image button
+        //Move to GalleryActivity
+        ImageButton btnGallery = (ImageButton) findViewById(R.id.gallery);
+        btnGallery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(
+                        Intent.ACTION_DEFAULT,
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+
+                startActivityForResult(i, RESULT_LOAD_IMAGE);
+            }
+        });
+
         mTextureView = (AutoFitTextureView) findViewById(R.id.textureView);
         fabPicture=(FloatingActionButton)findViewById(R.id.fabPicture);
         fabTorch=(FloatingActionButton)findViewById(R.id.fabTorch);
@@ -959,16 +986,23 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 switch (v.getId()) {
                     case R.id.fabPicture: {
+                        String fName=new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss").format(new Date())+"pic.jpg";
+                        mPath= new File(Environment.getExternalStorageDirectory()+"/DCIM/DoJumpShot/");
+                        if (!mPath.exists())
+                        {
+                            mPath.mkdirs();
+                        }
+                        mFile = new File(mPath, fName);
                         takePicture();
                         break;
                     }
                     case R.id.info: {
-                        if (null != this) {
+
                             new AlertDialog.Builder(getApplicationContext())
                                     .setMessage(R.string.intro_message)
                                     .setPositiveButton(android.R.string.ok, null)
                                     .show();
-                        }
+
                         break;
                     }
                 }
@@ -982,8 +1016,6 @@ public class MainActivity extends AppCompatActivity {
                 switchFlash();
             }
         });
-
-        mFile = new File(this.getExternalFilesDir(null), "pic.jpg");
     }
 
     private boolean isTorchOn=false;
@@ -992,10 +1024,15 @@ public class MainActivity extends AppCompatActivity {
         isTorchOn=!isTorchOn;
         mPreviewRequestBuilder.set(CaptureRequest.FLASH_MODE,isTorchOn?CaptureRequest.FLASH_MODE_TORCH:CaptureRequest.FLASH_MODE_OFF);
         try{
-            mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), null, null);
+            mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, mBackgroundHandler);
         }catch (CameraAccessException e)
         {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

@@ -36,5 +36,18 @@
         android:layout_marginTop="24dp"
         app:backgroundTint="@null"
         />
+    <ImageButton
+        android:id="@+id/gallery"
+        android:src="@drawable/gallery"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="24dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginBottom="20dp"
+        app:backgroundTint="@null"
+        />
 
 </RelativeLayout>
