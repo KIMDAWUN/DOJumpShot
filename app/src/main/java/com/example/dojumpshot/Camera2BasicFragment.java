@@ -134,6 +134,8 @@ public class Camera2BasicFragment extends Fragment
 
   private static boolean ONOFF=false;
 
+  private static final float THRESHOLD=0.8f;
+
   private MediaScanner ms;
   /**
    * {@link TextureView.SurfaceTextureListener} handles several lifecycle events on a {@link
@@ -1049,7 +1051,7 @@ public class Camera2BasicFragment extends Fragment
     bitmap.recycle();
     showToast(textToShow);
 
-    if(classifier.getLabelProbArray()[0][classifier.getLabelList().indexOf("nojump")]>0.7&&ONOFF)
+    if(classifier.getLabelProbArray()[0][classifier.getLabelList().indexOf("jump")]>THRESHOLD&&ONOFF)
     {
       ONOFF=false;
       getActivity().findViewById(R.id.picture).setEnabled(true);
