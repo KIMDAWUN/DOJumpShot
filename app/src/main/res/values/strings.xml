@@ -2,7 +2,7 @@
     <string name="app_name">DOJumpShot</string>
     <string name="picture">Picture</string>
     <string name="description_info">Info</string>
-    <string name="request_permission">This sample needs camera permission.</string>
+    <string name="request_permission">This sample needs permission.</string>
     <string name="camera_error">This device doesn\'t support Camera2 API.</string>
     <string name="toggle_turn_on">NN:On</string>
     <string name="toggle_turn_off">NN:Off</string>
