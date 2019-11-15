@@ -71,11 +71,19 @@ class ImageClassifier {
   /** An instance of the driver class to run model inference with Tensorflow Lite. */
   private Interpreter tflite;
 
+  List<String> getLabelList() {
+    return labelList;
+  }
+
   /** Labels corresponding to the output of the vision model. */
   private List<String> labelList;
 
   /** A ByteBuffer to hold image data, to be feed into Tensorflow Lite as inputs. */
   private ByteBuffer imgData;
+
+  float[][] getLabelProbArray() {
+    return labelProbArray;
+  }
 
   /** An array to hold inference results, to be feed into Tensorflow Lite as outputs. */
   private float[][] labelProbArray;
@@ -101,6 +109,7 @@ class ImageClassifier {
     filterLabelProbArray = new float[FILTER_STAGES][labelList.size()];
     Log.d(TAG, "Created a Tensorflow Lite Image Classifier.");
   }
+
 
   /** Classifies a frame from the preview stream. */
   String classifyFrame(Bitmap bitmap) {
