@@ -41,11 +41,11 @@ import java.util.PriorityQueue;
 /** Classifies images with Tensorflow Lite. */
 class ImageClassifier {
 
-  /** Tag for the {@link Log}. */
+  /** Taag for the {@link Log}. */
   private static final String TAG = "DoJumpShot";
 
   /** Name of the model file stored in Assets. */
-  private static final String MODEL_PATH = "graph.lite";
+  private static final String MODEL_PATH = "mobilenet_v2_2800.lite";
 
   /** Name of the label file stored in Assets. */
   private static final String LABEL_PATH = "labels.txt";

@@ -134,7 +134,7 @@ public class Camera2BasicFragment extends Fragment
 
   private static boolean ONOFF=false;
 
-  private static final float THRESHOLD=0.8f;
+  private static final float THRESHOLD=0.9f;
 
   private MediaScanner ms;
   /**
@@ -1054,7 +1054,6 @@ public class Camera2BasicFragment extends Fragment
     if(classifier.getLabelProbArray()[0][classifier.getLabelList().indexOf("jump")]>THRESHOLD&&ONOFF)
     {
       ONOFF=false;
-      getActivity().findViewById(R.id.picture).setEnabled(true);
       mFile = new File(mPath, new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss").format(new Date())+"_jump.jpg");
       takePicture();
     }
