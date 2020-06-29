@@ -7,3 +7,5 @@
 # References
 **Mobile Classification:** https://github.com/googlecodelabs/tensorflow-for-poets-2  
 **Camera 2 API:** https://github.com/googlearchive/android-Camera2Basic
+
+### Link: https://youtu.be/h4-CWjlzB94
