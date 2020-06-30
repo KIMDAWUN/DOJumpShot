@@ -1,5 +1,8 @@
 # DOJumpShot
 **Deep-Learning Oriented Camera Application** that automatically take the best Jumping Photo by using ***tensorflow lite Image Classification model***.
+**Data curation:** Instagram Crawling (about 10,000 pics)
+**Label:** Jump / NoJump
+**Model:** Pretrained MobileNetV2 model with ImageNet (Transfer Learning)
 
 # Members
 **Dawun Kim & Dongju Jang**
